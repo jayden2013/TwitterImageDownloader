@@ -18,6 +18,10 @@ import javax.imageio.ImageIO;
 public class TwitterImageDownloader {
 
 	public static void main(String[] args){
+		if (args.length == 0 || args.length > 3){
+			System.err.println(usage());
+			return;
+		}
 		String username = args[0];
 		String fileName = "tweets.csv";
 		int desiredAmount = 99999; //99,999 image default
@@ -35,9 +39,11 @@ public class TwitterImageDownloader {
 			String str = "", error = "https://twitter.com/iwazsleep_/status/950134915726680065"; //Error is just the image that will be used if the original photo was deleted, so program will not crash.
 			str = bufRead.readLine();
 			ArrayList<URL> photoURLs = new ArrayList<URL>();
+			ArrayList<String> descriptions = new ArrayList<String>();
 			InputStream inStream;
 			BufferedReader bufReadImage;
 			String pageString = "";
+			int descriptionCounter = 0; //Track how many descriptions need to be added to the arraylist.
 			int count = 0;
 
 			while ((str = bufRead.readLine()) != null && count < desiredAmount){
@@ -60,9 +66,16 @@ public class TwitterImageDownloader {
 							if (pageString.contains(":large")){ //Check if direct link
 								photoURLs.add(new URL((pageString.substring(40, 87)))); //Add URL to ArrayList
 								count++;
+								descriptionCounter++; //count how many times a photo is found in one tweet.
 								System.out.println("Found " + count + " image(s)...");
 							}
+							if (pageString.contains("og:description")){ //Get photo description for output
+								for (int i = 0; i < descriptionCounter; i++){ //Add description to arraylist so that each photo has a description and no exception is thrown later.
+									descriptions.add(pageString.substring(49, pageString.length() - 5)); //add description to description arraylist
+								}
+							}
 						}
+						descriptionCounter = 0; //Reset description counter
 					}
 				}
 			}
@@ -77,11 +90,14 @@ public class TwitterImageDownloader {
 
 			File outputFile;
 			String photoName;
+			count = 0; //Reset count to use in loop.
 			for (URL url : photoURLs){
 				photo = ImageIO.read(url);
 				photoName = url.toString().substring(28);
 				outputFile = new File(username + "\\" + photoName);
 				ImageIO.write(photo, "png", outputFile);
+				count++;
+				System.out.println(count + " Saved: " + photoName + " | " + descriptions.get(count - 1));
 			}
 			System.out.println("Saved " + count + " images...");
 		}
