@@ -73,6 +73,7 @@ public class TwitterImageDownloader {
 								for (int i = 0; i < descriptionCounter; i++){ //Add description to arraylist so that each photo has a description and no exception is thrown later.
 									descriptions.add(pageString.substring(49, pageString.length() - 5)); //add description to description arraylist
 								}
+								break; //TURBOCHARGER
 							}
 						}
 						descriptionCounter = 0; //Reset description counter
